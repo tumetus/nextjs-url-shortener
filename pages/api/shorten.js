@@ -2,11 +2,10 @@ import { redis } from "../../lib/redis";
 
 export default async function handler(req, res) {
   const { longUrl } = req.body;
-  console.log(longUrl);
-
-  // todo : validate that url is valid url (must be absolute url and include https://)
-
-  // todo : check if shortUrl exists
+  if (!longUrl || longUrl.length <= 0) {
+    res.status(400).json({ status: "Error: url not set." });
+    return;
+  }
 
   const shortUrl = makeShortUrl(4);
 
@@ -14,7 +13,7 @@ export default async function handler(req, res) {
   let result = await redis.hset("links", { [shortUrl]: longUrl });
 
   res.status(200).json({
-    todo: "shorten the given url. ehkä tarvitaan joku toinen datatype kun lista koska kun pitää hakea short urlille arvo, niin listasta vaikea hakea?",
+    status: "Success!",
   });
 }
 

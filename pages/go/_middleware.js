@@ -13,11 +13,23 @@ export default async function middleware(req) {
 
   // load long url from redis for short url
   const longUrl = await redis.hget("links", shortUrl);
-
-  console.log(longUrl);
-
-  // redirect to long url (if found)
-  return NextResponse.redirect(longUrl);
-
-  //   return response;
+  if (longUrl) {
+    // short url found
+    const validUrl = getValidUrl(longUrl);
+    // redirect to long url
+    return NextResponse.redirect(validUrl);
+  } else {
+    // redirect to the domain root
+    return NextResponse.redirect(req.nextUrl.origin);
+  }
 }
+
+const getValidUrl = (link) => {
+  if (link.indexOf("http://") == 0 || link.indexOf("https://") == 0) {
+    // Link has http or https -> return as is
+    return link;
+  } else {
+    // Link doesn't have http or https -> add it
+    return `https://${link}`;
+  }
+};
